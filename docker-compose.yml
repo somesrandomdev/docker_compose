@@ -1,0 +1,52 @@
+# docker-compose.yml  (Task 2 + Task 6)
+version: "3"           # sheet uses no minor version – keep it light
+
+services:
+  # ---- MySQL  (sheet calls the service "db") ---------------------------
+  db:
+    image: mysql:5.7          # sheet literally wrote "mysql:x.x" – 5.7 is light
+    container_name: mysql-db  # Task 6 – custom name
+    restart: always           # Task 6 – restart policy
+    environment:              # Task 2 – exact vars from sheet
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress123
+      MYSQL_ROOT_PASSWORD: rootpass123
+    volumes:
+      - db_data:/var/lib/mysql          # Task 3 – named volume
+
+  # ---- WordPress  (sheet port 8080->80) -------------------------------
+  wordpress:
+    image: wordpress:latest
+    container_name: wp-app   # Task 6 – custom name
+    restart: always
+    ports:
+      - "8080:80"
+    environment:             # Task 2 – exact vars from sheet
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress123
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wordpress_data:/var/www/html   # Task 3 – named volume
+    depends_on:
+      - db
+
+  # ---- phpMyAdmin  (Task 6 – port 8081) -------------------------------
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma      # Task 6 – custom name
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: wordpress
+      PMA_PASSWORD: wordpress123
+    depends_on:
+      - db
+
+# Task 3 – declare the two named volumes exactly as requested
+volumes:
+  wordpress_data:
+  db_data:
